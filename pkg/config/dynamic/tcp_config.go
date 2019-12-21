@@ -57,10 +57,18 @@ type TCPRouter struct {
 
 // RouterTCPTLSConfig holds the TLS configuration for a router
 type RouterTCPTLSConfig struct {
-	Passthrough  bool           `json:"passthrough" toml:"passthrough" yaml:"passthrough"`
-	Options      string         `json:"options,omitempty" toml:"options,omitempty" yaml:"options,omitempty"`
-	CertResolver string         `json:"certResolver,omitempty" toml:"certResolver,omitempty" yaml:"certResolver,omitempty"`
-	Domains      []types.Domain `json:"domains,omitempty" toml:"domains,omitempty" yaml:"domains,omitempty"`
+	Passthrough  bool                              `json:"passthrough" toml:"passthrough" yaml:"passthrough"`
+	Options      string                            `json:"options,omitempty" toml:"options,omitempty" yaml:"options,omitempty"`
+	CertResolver string                            `json:"certResolver,omitempty" toml:"certResolver,omitempty" yaml:"certResolver,omitempty"`
+	Domains      []types.Domain                    `json:"domains,omitempty" toml:"domains,omitempty" yaml:"domains,omitempty"`
+	STARTTLS     *RouterTCPTLSConfigSTARTTLSConfig `json:"starttls,omitempty" toml:"starttls,omitempty" yaml:"starttls,omitempty"`
+}
+
+// +k8s:deepcopy-gen=true
+
+// RouterTCPTLSConfigSTARTTLSConfig holds the STARTTLS configuration for a tls configuration
+type RouterTCPTLSConfigSTARTTLSConfig struct {
+	Protocol string `json:"protocol" toml:"protocol" yaml:"protocol"`
 }
 
 // +k8s:deepcopy-gen=true

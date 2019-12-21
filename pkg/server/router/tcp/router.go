@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/containous/traefik/v2/pkg/config/runtime"
 	"github.com/containous/traefik/v2/pkg/log"
@@ -236,7 +237,19 @@ func (m *Manager) buildEntryPointHandler(ctx context.Context, configs map[string
 						continue
 					}
 
-					router.AddRouteTLS(domain, handler, tlsConf)
+					if routerConfig.TLS.STARTTLS != nil {
+						protocol := strings.ToLower(routerConfig.TLS.STARTTLS.Protocol)
+						if !tcp.IsSTARTTLSProtocolSupported(protocol) {
+							err = fmt.Errorf("STARTTLS protocol %s is not supported", protocol)
+							routerConfig.AddError(err, true)
+							logger.Debug(err)
+							continue
+						}
+						router.AddRouteSTARTTLS(domain, protocol, handler, tlsConf)
+						logger.Debugf("Added route %s on TCP with STARTTLS", domain)
+					} else {
+						router.AddRouteTLS(domain, handler, tlsConf)
+					}
 				}
 			case domain == "*":
 				router.AddCatchAllNoTLS(handler)

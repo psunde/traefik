@@ -33,9 +33,20 @@ func (r *Router) ServeTCP(conn WriteCloser) {
 		return
 	}
 
+	var wildcardHandler Handler
+	if target, ok := r.routingTable["*"]; ok {
+		wildcardHandler = target
+	}
+
 	br := bufio.NewReader(conn)
 	serverName, tls, peeked := clientHelloServerName(br)
 	if !tls {
+		// Because there is no SNI on STARTTLS we try if handler is an STARTTLSHandler
+		if h, ok := wildcardHandler.(*STARTTLSHandler); ok {
+			h.ServeTCP(r.GetConn(conn, peeked))
+			return
+		}
+
 		switch {
 		case r.catchAllNoTLS != nil:
 			r.catchAllNoTLS.ServeTCP(r.GetConn(conn, peeked))
@@ -57,8 +68,8 @@ func (r *Router) ServeTCP(conn WriteCloser) {
 	}
 
 	// FIXME Needs tests
-	if target, ok := r.routingTable["*"]; ok {
-		target.ServeTCP(r.GetConn(conn, peeked))
+	if wildcardHandler != nil {
+		wildcardHandler.ServeTCP(r.GetConn(conn, peeked))
 		return
 	}
 
@@ -82,6 +93,15 @@ func (r *Router) AddRouteTLS(sniHost string, target Handler, config *tls.Config)
 	r.AddRoute(sniHost, &TLSHandler{
 		Next:   target,
 		Config: config,
+	})
+}
+
+// AddRouteSTARTTLS defines a handler for a given sniHost and sets the matching tlsConfig
+func (r *Router) AddRouteSTARTTLS(sniHost, protocol string, target Handler, config *tls.Config) {
+	r.AddRoute(sniHost, &STARTTLSHandler{
+		Next:     target,
+		Config:   config,
+		Protocol: protocol,
 	})
 }
 
