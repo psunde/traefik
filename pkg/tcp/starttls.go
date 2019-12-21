@@ -47,7 +47,7 @@ func (s *STARTTLSHandler) ServeTCP(conn WriteCloser) {
 	}
 
 	if err := protoHandler.StartTLS(conn); err != nil {
-		log.Errorf("Could not start tls: %s", err.Error())
+		log.Errorf("Could not perform STARTTLS: %s", err.Error())
 		return
 	}
 

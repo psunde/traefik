@@ -246,7 +246,6 @@ func (m *Manager) buildEntryPointHandler(ctx context.Context, configs map[string
 							continue
 						}
 						router.AddRouteSTARTTLS(domain, protocol, handler, tlsConf)
-						logger.Debugf("Added route %s on TCP with STARTTLS", domain)
 					} else {
 						router.AddRouteTLS(domain, handler, tlsConf)
 					}

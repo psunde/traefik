@@ -946,3 +946,38 @@ tcp:
             sans: 
               - "*.snitest.com"
 ```
+
+#### `starttls`
+
+The `starttls` field enables STARTTLS termination for this rounter.  
+Because STARTTLS does not have support for SNI the `HostSNI` rule has to be set to `*`.  
+
+Depending on the specific protocol a certificate can be selected. This certificate has to be manually configured in `tls.domains.main`
+
+Currenty the following protocols are supported:
+- XMPP ([RFC6120](https://tools.ietf.org/html/rfc6120#section-5))
+
+```toml tab="File (TOML)"
+## Dynamic configuration
+[tcp.routers]
+  [tcp.routers.routerbar]
+    rule = "HostSNI(`*`)"
+    [tcp.routers.routerbar.tls]
+      [tcp.routers.routerbar.tls.starttls]
+        protocol = "xmpp"
+      [[tcp.routers.routerbar.tls.domains]]
+        main = "snitest.com"
+```
+
+```yaml tab="File (YAML)"
+## Dynamic configuration
+tcp:
+  routers:
+    routerbar:
+      rule: "HostSNI(`*`)"
+      tls:
+        starttls:
+          protocol: "xmpp"
+        domains:
+          - main: "snitest.com"
+```
